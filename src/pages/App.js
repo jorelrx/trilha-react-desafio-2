@@ -1,51 +1,30 @@
-
-import { useState } from 'react';
-import gitLogo from '../assets/github.png'
-import Input from '../components/Input';
-import Button from '../components/Button';
-import ItemRepo from '../components/ItemRepo';
-import { api } from '../services/api';
-
+// App.js
+import React, { useState } from 'react';
+import UserProfile from '../components/UserProfile';
+import FavoriteRepos from '../components/FavoriteRepos';
 import { Container } from './styles';
 
 function App() {
+  const [favoriteRepos, setFavoriteRepos] = useState([]);
 
-  const [currentRepo, setCurrentRepo] = useState('');
-  const [repos, setRepos] = useState([]);
-
-
-  const handleSearchRepo = async () => {
-
-    const {data} = await api.get(`repos/${currentRepo}`)
-
-    if(data.id){
-
-      const isExist = repos.find(repo => repo.id === data.id);
-
-      if(!isExist){
-        setRepos(prev => [...prev, data]);
-        setCurrentRepo('')
-        return
-      }
-
+  const handleAddRepo = (repo) => {
+    const exists = favoriteRepos.some(favRepo => favRepo.id === repo.id);
+    if (!exists) {
+      setFavoriteRepos(prev => [...prev, repo]);
+    } else {
+      alert('Repositório já adicionado aos favoritos');
     }
-    alert('Repositório não encontrado')
-
-  }
+  };
 
   const handleRemoveRepo = (id) => {
-    console.log('Removendo registro', id);
-
-    // utilizar filter.
-  }
-
+    setFavoriteRepos(prevRepos => prevRepos.filter(repo => repo.id !== id));
+  };
 
   return (
     <Container>
-      <img src={gitLogo} width={72} height={72} alt="github logo"/>
-      <Input value={currentRepo} onChange={(e) => setCurrentRepo(e.target.value)} />
-      <Button onClick={handleSearchRepo}/>
-      {repos.map(repo => <ItemRepo handleRemoveRepo={handleRemoveRepo} repo={repo}/>)}
+      <h1>Github Explorer</h1>
+      <UserProfile onAddRepo={handleAddRepo} />
+      <FavoriteRepos repos={favoriteRepos} onRemoveRepo={handleRemoveRepo} />
     </Container>
   );
 }
